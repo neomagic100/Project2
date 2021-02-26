@@ -50,6 +50,7 @@ public class Project2 {
 			selection = scnr.nextLine();
 		}
 		
+		scnr.close();
 		return Integer.parseInt(selection);
 	}
 	
@@ -63,18 +64,14 @@ public class Project2 {
 			return true;
 		}
 		
-		if (selectionInt < 1 || selectionInt > 7) {
-			return true;
-		}
-		
-		return false;
+		return (selectionInt < 1 || selectionInt > 7);
 	}
 }
 
 abstract class Person {
 	//TODO
-	protected final String EMPTY_NAME = "NoName";
-	protected final String EMPTY_ID   = "NoID";
+	protected static final String EMPTY_NAME = "NoName",
+								  EMPTY_ID   = "NoID";
 	
 	private String name;
 	private String id;
@@ -122,15 +119,30 @@ abstract class Person {
 
 abstract class Employee extends Person {
 	//TODO
+	protected static final String DEPT_MATH  = "Mathematics",
+						   		  DEPT_ENGIN = "Engineering",
+						   		  DEPT_SCI   = "Sciences",
+						   		  EMPTY_DEPT = "NoDept";
 	private String department;
-	protected final String DEPT_MATH  = "Mathematics",
-						   DEPT_ENGIN = "Engineering",
-						   DEPT_SCI   = "Sciences",
-						   EMPTY_DEPT = "NoDept";
+	
+	public void promptDepartment() {
+		Scanner scnr = new Scanner(System.in);
+		String dept = scnr.nextLine();
+		
+		while (!isValidDepartment(dept)) {
+			//TODO print Error message
+			dept = scnr.nextLine();
+		}
+		
+		// Change to first letter upper case, rest of string lower case
+		dept = dept.toLowerCase();
+		dept = dept.substring(0, 1).toUpperCase() + dept.substring(1);
+		
+		this.department = dept;
+	}
 	
 	// Internal method to check validity of department
-	@SuppressWarnings("unused")
-	protected boolean isValidDepartment(String inputDept) {
+	private boolean isValidDepartment(String inputDept) {
 		return (inputDept.equalsIgnoreCase(DEPT_MATH) || inputDept.equalsIgnoreCase(DEPT_ENGIN) || inputDept.equalsIgnoreCase(DEPT_SCI));
 	}
 	
@@ -150,7 +162,11 @@ abstract class Employee extends Person {
 }
 
 class Student extends Person {
-	private double gpa, tuition;
+	private static final double PRICE_PER_CREDIT_HOUR = 236.45,
+								ADMIN_FEE			  = 52.0,
+								DISCOUNT			  = 0.25,
+								HIGH_GPA			  = 3.85;
+	private double gpa, tuition, discount;
 	private int creditHours;
 	
 	/**
@@ -176,6 +192,20 @@ class Student extends Person {
 		this.gpa = gpa;
 		this.creditHours = creditHours;
 		tuition = 0;
+	}
+	
+	public void calculateNetTuitionAndDiscount() {
+		double grossTuition = calculateGrossTuition();
+		this.discount = calculateDiscount(grossTuition);
+		this.tuition = grossTuition - this.discount;		
+	}
+	
+	private double calculateGrossTuition() {
+		return ADMIN_FEE + (creditHours * PRICE_PER_CREDIT_HOUR);
+	}
+	
+	private double calculateDiscount(double grossTuition) {
+		return (gpa > HIGH_GPA) ? (grossTuition * DISCOUNT) : 0.0;
 	}
 	
 	@Override
@@ -212,12 +242,20 @@ class Student extends Person {
 	public void setCreditHours(int creditHours) {
 		this.creditHours = creditHours;
 	}
+	
+	public double getDiscount() {
+		return discount;
+	}
+	
+	public double getTuition() {
+		return tuition;
+	}
 }
 
 class Faculty extends Employee {
-	private final String RANK_PROF =  "Professor",
-						 RANK_ADJ  =  "Adjunct",
-						 EMPTY_RANK = "NoRank";
+	private static final String RANK_PROF =  "Professor",
+								RANK_ADJ  =  "Adjunct",
+								EMPTY_RANK = "NoRank";
 	private String rank;
 	
 	public Faculty() {
@@ -262,7 +300,7 @@ class Faculty extends Employee {
 }
 
 class Staff extends Employee {
-	private final String EMPTY_STATUS = "NoStatus";
+	private static final String EMPTY_STATUS = "NoStatus";
 	private String status;
 	
 	public Staff() {
