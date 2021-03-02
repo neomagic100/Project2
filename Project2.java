@@ -12,6 +12,7 @@ public class Project2 {
 		while (choice != 7) {
 			//TODO Get option
 			choice = getOptionSelected();
+			runOptionSwitch(choice, people);
 			if (choice == EXIT) {
 				// TODO print bye
 				break;
@@ -20,15 +21,29 @@ public class Project2 {
 		}
 	}
 	
-	public static Person runOptionSwitch(int choice) {
+	public static Person runOptionSwitch(int choice, Person[] people) {
 		Person person = null;
-		
+		int personIndex;
+		Scanner scnr = new Scanner(System.in);
+		String inputId;
 		// If setting, create and return new Person
 		// If getting, find and return that person
 		
 		
 		switch(choice) {
 			// TODO makes cases 1-6
+			case 1: // Enter faculty info
+				Faculty facultyMember = new Faculty();
+				facultyMember.promptForFacultyInfo();
+				people[facultyMember.getPersonNum()] = facultyMember;
+				return facultyMember;
+			case 2:
+			case 3:
+			case 4:
+				System.out.println("\n\n\tEnter the faculty's id: ");
+				inputId = scnr.nextLine();
+				Person.findPersonIndex(people, inputId);
+				break;
 			default:
 				// TODO invalid selection
 				break;
@@ -50,7 +65,7 @@ public class Project2 {
 			selection = scnr.nextLine();
 		}
 		
-		scnr.close();
+		
 		return Integer.parseInt(selection);
 	}
 	
@@ -75,19 +90,30 @@ abstract class Person {
 	
 	private String name;
 	private String id;
+	private static int totalPeople = 0;
+	private int personNum;
 	
-	public Person findPerson(Person[] personArray, String searchID) {
+	// Not found: return -1
+	public static int findPersonIndex(Person[] personArray, String searchID) {
 		
-		for (Person person : personArray) {
-			if (person.id.equalsIgnoreCase(searchID))
-				return person;
+		for (int i = 0; i < totalPeople; i++) {
+			if (personArray[i].getId().equalsIgnoreCase(searchID))
+				personArray[i].print();
 		}
 		
-		return null;
+		return -1;
 	}
 	
 	public abstract void print();
 
+	private static void incrementTotalPeople() {
+		totalPeople++;
+	}
+	
+	public static int getTotalPeople() {
+		return totalPeople;
+	}
+	
 	/**
 	 * @return the name
 	 */
@@ -115,6 +141,15 @@ abstract class Person {
 	public void setId(String id) {
 		this.id = id;
 	}
+
+	public int getPersonNum() {
+		return personNum;
+	}
+
+	public void assignPersonNum() {
+		this.personNum = totalPeople;
+		Person.incrementTotalPeople();
+	}
 }
 
 abstract class Employee extends Person {
@@ -127,10 +162,12 @@ abstract class Employee extends Person {
 	
 	public void promptDepartment() {
 		Scanner scnr = new Scanner(System.in);
+		System.out.print("\n\n\tDepartment: ");
 		String dept = scnr.nextLine();
 		
 		while (!isValidDepartment(dept)) {
 			//TODO print Error message
+			System.out.print("\n\n\tDepartment: ");
 			dept = scnr.nextLine();
 		}
 		
@@ -177,6 +214,7 @@ class Student extends Person {
 		creditHours = -1;
 		this.setName(EMPTY_NAME);
 		this.setId(EMPTY_ID);
+		this.assignPersonNum();
 	}
 	
 	/**
@@ -192,6 +230,7 @@ class Student extends Person {
 		this.gpa = gpa;
 		this.creditHours = creditHours;
 		tuition = 0;
+		this.assignPersonNum();
 	}
 	
 	public void calculateNetTuitionAndDiscount() {
@@ -211,7 +250,7 @@ class Student extends Person {
 	@Override
 	public void print() {
 		// TODO Auto-generated method stub
-		
+		System.out.println(this.toString());
 	}
 	//TODO
 
@@ -250,6 +289,16 @@ class Student extends Person {
 	public double getTuition() {
 		return tuition;
 	}
+
+	@Override		//FIXME
+	public String toString() {
+		return "Student [gpa=" + gpa + ", tuition=" + tuition + ", discount=" + discount + ", creditHours="
+				+ creditHours + "]";
+	}
+
+	
+	
+	
 }
 
 class Faculty extends Employee {
@@ -263,6 +312,7 @@ class Faculty extends Employee {
 		this.setId(EMPTY_ID);
 		this.setDepartment(EMPTY_DEPT);
 		rank = EMPTY_RANK;
+		this.assignPersonNum();
 	}
 	
 	public Faculty(String name, String id, String dept, String rank) {
@@ -270,17 +320,44 @@ class Faculty extends Employee {
 		this.setId(id);
 		this.setDepartment(dept);
 		this.rank = rank;
+		this.assignPersonNum();
 	}
 	
+	public void promptForFacultyInfo() {
+		Scanner scnr = new Scanner(System.in);
+		System.out.println("\nEnter the faculty info:");
+		
+		System.out.print("\n\tName of Faculty: ");
+		this.setName(scnr.nextLine());
+		
+		System.out.print("\n\n\tID: ");
+		this.setId(scnr.nextLine());
+		
+		// make sure rank valid
+		while (!this.isValidRank()) {
+			System.out.print("\n\n\tRank: ");
+			this.setRank(scnr.nextLine());
+			if (!this.isValidRank())
+				System.out.println("\n\n\t\t\"" + this.getRank() + "\" is invalid\n");
+		}
+		
+		System.out.print("\n\n\tDepartment: ");
+		this.promptDepartment();
+		
+	}
 	
-	protected boolean isValidRank(String inputRank) {
+	private boolean isValidRank(String inputRank) {
 		return (inputRank.equalsIgnoreCase(RANK_PROF) || inputRank.equalsIgnoreCase(RANK_ADJ));
+	}
+	
+	private boolean isValidRank() {
+		return (this.getRank().equalsIgnoreCase(RANK_PROF) || this.getRank().equalsIgnoreCase(RANK_ADJ));
 	}
 	
 	@Override
 	public void print() {
 		// TODO Auto-generated method stub
-		
+		System.out.println(this.toString());
 	}
 	//TODO
 
@@ -297,6 +374,13 @@ class Faculty extends Employee {
 	public void setRank(String rank) {
 		this.rank = rank;
 	}
+
+	@Override		//FIXME
+	public String toString() {
+		return "Faculty [rank=" + rank + ", getDepartment()=" + getDepartment() + ", getName()=" + getName()
+				+ ", getId()=" + getId() + "]";
+	}
+
 }
 
 class Staff extends Employee {
@@ -308,6 +392,7 @@ class Staff extends Employee {
 		this.setId(EMPTY_ID);
 		this.setDepartment(EMPTY_DEPT);
 		status = EMPTY_STATUS;
+		this.assignPersonNum();
 	}
 	
 	public Staff(String name, String id, String dept, String status) {
@@ -315,6 +400,7 @@ class Staff extends Employee {
 		this.setId(id);
 		this.setDepartment(dept);
 		this.status = status;
+		this.assignPersonNum();
 	}
 	
 	protected boolean isValidStatus(String status) {
@@ -324,7 +410,7 @@ class Staff extends Employee {
 	@Override
 	public void print() {
 		// TODO Auto-generated method stub
-		
+		System.out.println(this.toString());
 	}
 	//TODO
 
@@ -341,4 +427,11 @@ class Staff extends Employee {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	@Override		//FIXME
+	public String toString() {
+		return "Staff [status=" + status + ", getDepartment()=" + getDepartment() + ", getName()=" + getName()
+				+ ", getId()=" + getId() + "]";
+	} 
+
 }
