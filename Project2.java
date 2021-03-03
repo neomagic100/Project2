@@ -28,7 +28,7 @@ public class Project2 {
 		String inputId;
 		// If setting, create and return new Person
 		// If getting, find and return that person
-		
+		int index;
 		
 		switch(choice) {
 			// TODO makes cases 1-6
@@ -40,9 +40,10 @@ public class Project2 {
 			case 2:
 			case 3:
 			case 4:
-				System.out.println("\n\n\tEnter the faculty's id: ");
+				System.out.print("\n\n\tEnter the faculty's id: ");
 				inputId = scnr.nextLine();
-				Person.findPersonIndex(people, inputId);
+				index = Person.findPersonIndex(people, inputId);
+				people[index].print(); //FIXME out of bounds
 				break;
 			default:
 				// TODO invalid selection
@@ -163,19 +164,18 @@ abstract class Employee extends Person {
 	public void promptDepartment() {
 		Scanner scnr = new Scanner(System.in);
 		System.out.print("\n\n\tDepartment: ");
-		String dept = scnr.nextLine();
+		department = scnr.nextLine();
 		
-		while (!isValidDepartment(dept)) {
-			//TODO print Error message
+		while (!isValidDepartment(department)) {
+			System.out.println("\n\t\"" + department + "\" is invalid. Please try again.");
 			System.out.print("\n\n\tDepartment: ");
-			dept = scnr.nextLine();
+			department = scnr.nextLine();
 		}
 		
 		// Change to first letter upper case, rest of string lower case
-		dept = dept.toLowerCase();
-		dept = dept.substring(0, 1).toUpperCase() + dept.substring(1);
+		department = department.toLowerCase();
+		department = department.substring(0, 1).toUpperCase() + department.substring(1);
 		
-		this.department = dept;
 	}
 	
 	// Internal method to check validity of department
@@ -341,7 +341,9 @@ class Faculty extends Employee {
 				System.out.println("\n\n\t\t\"" + this.getRank() + "\" is invalid\n");
 		}
 		
-		System.out.print("\n\n\tDepartment: ");
+		this.setRank(this.getRank().toLowerCase());
+		this.setRank(this.getRank().substring(0, 1).toUpperCase() + this.getRank().substring(1));
+		
 		this.promptDepartment();
 		
 	}
