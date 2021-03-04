@@ -3,6 +3,9 @@ import java.util.Scanner;
 public class Project2 {
 	public static final int MAX_PEOPLE = 100;
 	public static final int EXIT = 7;
+	public static final String FACULTY = "Faculty",
+							   STAFF   = "Staff",
+							   STUDENT = "Student";
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -21,36 +24,52 @@ public class Project2 {
 		}
 	}
 	
-	public static Person runOptionSwitch(int choice, Person[] people) {
-		Person person = null;
-		int personIndex;
+	public static void runOptionSwitch(int choice, Person[] people) {
 		Scanner scnr = new Scanner(System.in);
 		String inputId;
-		// If setting, create and return new Person
-		// If getting, find and return that person
-		int index;
 		
 		switch(choice) {
 			// TODO makes cases 1-6
 			case 1: // Enter faculty info
 				Faculty facultyMember = new Faculty();
 				facultyMember.promptForFacultyInfo();
-				people[facultyMember.getPersonNum()] = facultyMember;
-				return facultyMember;
-			case 2:
+				Person.addToArray(people, facultyMember);
+				break;
+			case 2: // Enter student info
+				break;
+			case 5: // Enter Staff info
+				break;
 			case 3:
 			case 4:
-				System.out.print("\n\n\tEnter the faculty's id: ");
+			case 6:
+				System.out.print("\n\n\tEnter the" + casePersonType(choice) + "'s id: ");
 				inputId = scnr.nextLine();
-				index = Person.findPersonIndex(people, inputId);
-				people[index].print(); //FIXME out of bounds
+				Person.printPersonIndex(people, inputId, casePersonType(choice));
 				break;
 			default:
 				// TODO invalid selection
 				break;
 		}
+	}
+	
+	public static String casePersonType(int choice) {
+		String personType;
+		switch (choice) {
+			case 3:
+				personType = STUDENT;
+				break;
+			case 4:
+				personType = FACULTY;
+				break;
+			case 6:
+				personType = STAFF;
+				break;
+			default:
+				personType = "Error";
+				break;
+		}
 		
-		return person;
+		return personType;
 	}
 	
 	public static int getOptionSelected() {
@@ -98,11 +117,31 @@ abstract class Person {
 	public static int findPersonIndex(Person[] personArray, String searchID) {
 		
 		for (int i = 0; i < totalPeople; i++) {
-			if (personArray[i].getId().equalsIgnoreCase(searchID))
-				personArray[i].print();
+			if (personArray[i].getId().equalsIgnoreCase(searchID)) {
+				return i;
+			}
 		}
 		
 		return -1;
+	}
+	
+	public static void addToArray(Person[] people, Person personToAdd) {
+		people[personToAdd.getPersonNum()] = personToAdd;
+		
+	}
+
+	public static void printPersonIndex(Person[] personArray, String searchID, String personType) {
+		
+		for (int i = 0; i < totalPeople; i++) {
+			if (personArray[i].getId().equalsIgnoreCase(searchID))
+				personArray[i].print();
+			else
+				printPersonNotFound(personType);
+		}
+	}
+	
+	public static void printPersonNotFound(String personType) {
+		System.out.println("\n\n\t" + personType + " not found");
 	}
 	
 	public abstract void print();
