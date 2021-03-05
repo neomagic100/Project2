@@ -16,10 +16,9 @@ public class Project2 {
 			//TODO Get option
 			choice = getOptionSelected();
 			runOptionSwitch(choice, people);
-			if (choice == EXIT) {
-				// TODO print bye
+			if (choice == EXIT)
 				break;
-			}
+			
 			//TODO Execute command selected through switch
 		}
 	}
@@ -32,7 +31,7 @@ public class Project2 {
 			// TODO makes cases 1-6
 			case 1: // Enter faculty info
 				Faculty facultyMember = new Faculty();
-				facultyMember.promptForFacultyInfo();
+				facultyMember.promptForInfo();
 				Person.addToArray(people, facultyMember);
 				break;
 			case 2: // Enter student info
@@ -46,8 +45,10 @@ public class Project2 {
 				inputId = scnr.nextLine();
 				Person.printPersonIndex(people, inputId, casePersonType(choice));
 				break;
-			default:
-				// TODO invalid selection
+			case 7:
+				System.out.println("\n\n\nThank you, goodbye.\n");
+				break;
+			default: // Invalid selection already handled in getOptionSelected
 				break;
 		}
 	}
@@ -81,7 +82,7 @@ public class Project2 {
 		selection = scnr.nextLine();
 		
 		while (invalidSelection(selection)) {
-			System.out.println("Invalid Selection");
+			System.out.println("\n\nInvalid Selection. Please Try again.\n");
 			selection = scnr.nextLine();
 		}
 		
@@ -110,49 +111,43 @@ abstract class Person {
 	
 	private String name;
 	private String id;
-	private static int totalPeople = 0;
-	private int personNum;
-	
-	// Not found: return -1
-	public static int findPersonIndex(Person[] personArray, String searchID) {
-		
-		for (int i = 0; i < totalPeople; i++) {
-			if (personArray[i].getId().equalsIgnoreCase(searchID)) {
-				return i;
-			}
-		}
-		
-		return -1;
-	}
 	
 	public static void addToArray(Person[] people, Person personToAdd) {
-		people[personToAdd.getPersonNum()] = personToAdd;
-		
+		for (int i = 0; i < people.length; i++) {
+			if (people[i] == null) {
+				people[i] = personToAdd;
+				break;
+			}
+		}	
 	}
 
 	public static void printPersonIndex(Person[] personArray, String searchID, String personType) {
 		
-		for (int i = 0; i < totalPeople; i++) {
-			if (personArray[i].getId().equalsIgnoreCase(searchID))
+		for (int i = 0; i < personArray.length; i++) {
+			if (personArray[i] != null && personArray[i].getId().equalsIgnoreCase(searchID)) {
 				personArray[i].print();
-			else
-				printPersonNotFound(personType);
+				return;
+			}	
 		}
+		
+		printPersonNotFound(personType);
 	}
 	
-	public static void printPersonNotFound(String personType) {
+	private static void printPersonNotFound(String personType) {
 		System.out.println("\n\n\t" + personType + " not found");
 	}
 	
-	public abstract void print();
-
-	private static void incrementTotalPeople() {
-		totalPeople++;
+	protected String capitalizeFirstLetter(String s) {
+		String retString;
+		retString = s.toLowerCase();
+		retString = retString.substring(0, 1).toUpperCase() + retString.substring(1);
+		
+		return retString;
 	}
 	
-	public static int getTotalPeople() {
-		return totalPeople;
-	}
+	public abstract void print();
+	public abstract void promptForInfo();
+
 	
 	/**
 	 * @return the name
@@ -182,14 +177,6 @@ abstract class Person {
 		this.id = id;
 	}
 
-	public int getPersonNum() {
-		return personNum;
-	}
-
-	public void assignPersonNum() {
-		this.personNum = totalPeople;
-		Person.incrementTotalPeople();
-	}
 }
 
 abstract class Employee extends Person {
@@ -212,8 +199,7 @@ abstract class Employee extends Person {
 		}
 		
 		// Change to first letter upper case, rest of string lower case
-		department = department.toLowerCase();
-		department = department.substring(0, 1).toUpperCase() + department.substring(1);
+		department = capitalizeFirstLetter(department);
 		
 	}
 	
@@ -253,7 +239,6 @@ class Student extends Person {
 		creditHours = -1;
 		this.setName(EMPTY_NAME);
 		this.setId(EMPTY_ID);
-		this.assignPersonNum();
 	}
 	
 	/**
@@ -269,7 +254,6 @@ class Student extends Person {
 		this.gpa = gpa;
 		this.creditHours = creditHours;
 		tuition = 0;
-		this.assignPersonNum();
 	}
 	
 	public void calculateNetTuitionAndDiscount() {
@@ -335,9 +319,11 @@ class Student extends Person {
 				+ creditHours + "]";
 	}
 
-	
-	
-	
+	@Override
+	public void promptForInfo() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 class Faculty extends Employee {
@@ -351,7 +337,6 @@ class Faculty extends Employee {
 		this.setId(EMPTY_ID);
 		this.setDepartment(EMPTY_DEPT);
 		rank = EMPTY_RANK;
-		this.assignPersonNum();
 	}
 	
 	public Faculty(String name, String id, String dept, String rank) {
@@ -359,10 +344,10 @@ class Faculty extends Employee {
 		this.setId(id);
 		this.setDepartment(dept);
 		this.rank = rank;
-		this.assignPersonNum();
 	}
 	
-	public void promptForFacultyInfo() {
+	@Override
+	public void promptForInfo() {
 		Scanner scnr = new Scanner(System.in);
 		System.out.println("\nEnter the faculty info:");
 		
@@ -373,32 +358,27 @@ class Faculty extends Employee {
 		this.setId(scnr.nextLine());
 		
 		// make sure rank valid
-		while (!this.isValidRank()) {
+		while (!this.hasValidRank()) {
 			System.out.print("\n\n\tRank: ");
 			this.setRank(scnr.nextLine());
-			if (!this.isValidRank())
+			if (!this.hasValidRank())
 				System.out.println("\n\n\t\t\"" + this.getRank() + "\" is invalid\n");
 		}
 		
-		this.setRank(this.getRank().toLowerCase());
-		this.setRank(this.getRank().substring(0, 1).toUpperCase() + this.getRank().substring(1));
+		rank = capitalizeFirstLetter(rank);
 		
 		this.promptDepartment();
 		
 	}
-	
-	private boolean isValidRank(String inputRank) {
-		return (inputRank.equalsIgnoreCase(RANK_PROF) || inputRank.equalsIgnoreCase(RANK_ADJ));
-	}
-	
-	private boolean isValidRank() {
-		return (this.getRank().equalsIgnoreCase(RANK_PROF) || this.getRank().equalsIgnoreCase(RANK_ADJ));
+		
+	private boolean hasValidRank() {
+		return (rank.equalsIgnoreCase(RANK_PROF) || rank.equalsIgnoreCase(RANK_ADJ));
 	}
 	
 	@Override
 	public void print() {
 		// TODO Auto-generated method stub
-		System.out.println(this.toString());
+		System.out.println(this);
 	}
 	//TODO
 
@@ -433,7 +413,6 @@ class Staff extends Employee {
 		this.setId(EMPTY_ID);
 		this.setDepartment(EMPTY_DEPT);
 		status = EMPTY_STATUS;
-		this.assignPersonNum();
 	}
 	
 	public Staff(String name, String id, String dept, String status) {
@@ -441,10 +420,13 @@ class Staff extends Employee {
 		this.setId(id);
 		this.setDepartment(dept);
 		this.status = status;
-		this.assignPersonNum();
 	}
 	
-	protected boolean isValidStatus(String status) {
+	protected boolean isValidStatus(String currStatus) {
+		return (currStatus.equalsIgnoreCase("p") || currStatus.equalsIgnoreCase("f"));
+	}
+	
+	private boolean hasValidStatus() {
 		return (status.equalsIgnoreCase("p") || status.equalsIgnoreCase("f"));
 	}
 	
@@ -473,6 +455,12 @@ class Staff extends Employee {
 	public String toString() {
 		return "Staff [status=" + status + ", getDepartment()=" + getDepartment() + ", getName()=" + getName()
 				+ ", getId()=" + getId() + "]";
+	}
+
+	@Override
+	public void promptForInfo() {
+		// TODO Auto-generated method stub
+		
 	} 
 
 }
