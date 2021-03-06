@@ -1,49 +1,47 @@
+import java.io.PrintStream;
 import java.util.Scanner;
 
 public class Project2 {
 	public static final int MAX_PEOPLE = 100;
 	public static final int EXIT = 7;
-	public static final String FACULTY = "Faculty",
-							   STAFF   = "Staff",
-							   STUDENT = "Student";
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		int choice = 0;
 		Person[] people = new Person[MAX_PEOPLE];
-		// Welcome
+		
+		// Welcome Message
+		
 		while (choice != 7) {
-			//TODO Get option
-			choice = getOptionSelected();
+			// Get option
+			choice = printOptionMenu();
 			runOptionSwitch(choice, people);
 			if (choice == EXIT)
 				break;
-			
-			//TODO Execute command selected through switch
 		}
 	}
 	
+	/**
+	 * Execute an action to set or get info, or exit
+	 * @param choice				User input integer selection
+	 * @param people				Array of Person
+	 */
 	public static void runOptionSwitch(int choice, Person[] people) {
-		Scanner scnr = new Scanner(System.in);
-		String inputId;
-		
 		switch(choice) {
 			// TODO makes cases 1-6
 			case 1: // Enter faculty info
-				Faculty facultyMember = new Faculty();
-				facultyMember.promptForInfo();
-				Person.addToArray(people, facultyMember);
+				Faculty tempFaculty = new Faculty();
+				Person.addToArray(people, tempFaculty);
 				break;
 			case 2: // Enter student info
+				Student tempStudent = new Student();
+				Person.addToArray(people, tempStudent);
 				break;
 			case 5: // Enter Staff info
 				break;
 			case 3:
 			case 4:
 			case 6:
-				System.out.print("\n\n\tEnter the" + casePersonType(choice) + "'s id: ");
-				inputId = scnr.nextLine();
-				Person.printPersonIndex(people, inputId, casePersonType(choice));
+				Person.findAndPrintPerson(people, choice, Person.casePersonType(choice));
 				break;
 			case 7:
 				System.out.println("\n\n\nThank you, goodbye.\n");
@@ -53,6 +51,155 @@ public class Project2 {
 		}
 	}
 	
+	/**
+	 * Get the selection the user chooses
+	 * @return						User input integer selection
+	 */
+	public static int getOptionSelected() {
+		String selection;
+		Scanner scnr = new Scanner(System.in);
+		
+		// TODO print menu
+		
+		selection = scnr.nextLine();
+		
+		while (invalidSelection(selection)) {
+			System.out.println("\n\tInvalid Selection. Please Try again.\n");
+			System.out.print("\n   Enter your Selection: ");
+			selection = scnr.nextLine();
+		}
+		
+		
+		return Integer.parseInt(selection);
+	}
+	
+	/**
+	 * Check if the user's input selection is invalid
+	 * @param selection				User input integer selection
+	 * @return						true or false
+	 */
+	public static boolean invalidSelection(String selection) {
+		int selectionInt;
+		
+		try {
+			selectionInt = Integer.parseInt(selection);
+		}
+		catch (NumberFormatException e) {
+			return true;
+		}
+		
+		return (selectionInt < 1 || selectionInt > 7);
+	}
+	
+	/**
+	 * Print the option menu and get the user's selection
+	 * @return						User input integer selection
+	 */
+	public static int printOptionMenu() {
+		PrintStream out = new PrintStream(System.out);
+				
+		out.println("1. Enter the information of a faculty");
+		out.println("2. Enter the information of a student");
+		out.println("3. Print tuition invoice");
+		out.println("4. Print faculty information");
+		out.println("5. Enter the information of a staff member");
+		out.println("6. Print staff member information");
+		out.println("7. Exit Program");
+		out.print("\n   Enter your Selection: ");
+		
+		return getOptionSelected();
+	}
+}
+
+/**
+ * 
+ * Person abstract class
+ * 
+ */
+abstract class Person {
+	// Constants
+	protected static final String FACULTY = "Faculty",
+			   					  STAFF   = "Staff",
+			                      STUDENT = "Student";
+	
+	// Fields
+	private String name;
+	private String id;
+	
+	/**
+	 * Add a Person to the first null slot of a Person array
+	 * @param people				Person array
+	 * @param personToAdd			Person being added to array
+	 */
+	public static void addToArray(Person[] people, Person personToAdd) {
+		for (int i = 0; i < people.length; i++) {
+			if (people[i] == null) {
+				people[i] = personToAdd;
+				break;
+			}
+		}	
+	}
+
+	/**
+	 * Check if a Person matches their string representation
+	 * @param p						Person being checked
+	 * @param personType			String representation of the person type
+	 * @return						true or false
+	 */
+	private static boolean validatePersonType(Person p, String personType) {
+		if (p.getClass().equals(Student.class) && personType.equalsIgnoreCase(STUDENT))
+			return true;
+		if (p.getClass().equals(Faculty.class) && personType.equalsIgnoreCase(FACULTY))
+			return true;
+		if (p.getClass().equals(Staff.class) && personType.equalsIgnoreCase(STAFF))
+			return true;
+		
+		return false;
+	}
+	
+	/**
+	 * Get a user id from console, find that Person in array, and print their information
+	 * @param personArray			Person Array
+	 * @param choice				User input integer selection
+	 * @param personType			String representation of the person type
+	 */
+	public static void findAndPrintPerson(Person[] personArray, int choice, String personType) {
+		Scanner scnr = new Scanner(System.in);
+		String inputId;
+		
+		System.out.print("\n\nEnter the " + casePersonType(choice) + "'s id: ");
+		inputId = scnr.nextLine();		
+		
+		// Search array for that person and print the relevant information
+		for (int i = 0; i < personArray.length; i++) {
+			if (personArray[i] != null && personArray[i].getId().equalsIgnoreCase(inputId) && 
+					Person.validatePersonType(personArray[i], personType)) {
+				personArray[i].print();
+				return;
+			}	
+		}
+		
+		System.out.println("\n\n\t" + personType + " not found");
+	}
+	
+	/**
+	 * Format a string to be lower case and have an upper case first letter
+	 * @param s						String to format
+	 * @return						Formatted string
+	 */
+	protected String capitalizeFirstLetter(String s) {
+		String retString;
+		retString = s.toLowerCase();
+		retString = retString.substring(0, 1).toUpperCase() + retString.substring(1);
+		
+		return retString;
+	}
+	
+	/**
+	 * Get the string representation of a Person type based on the user's selection
+	 * @param choice				User input integer selection
+	 * @return						String representation of the person type
+	 */
 	public static String casePersonType(int choice) {
 		String personType;
 		switch (choice) {
@@ -73,161 +220,101 @@ public class Project2 {
 		return personType;
 	}
 	
-	public static int getOptionSelected() {
-		String selection;
-		Scanner scnr = new Scanner(System.in);
-		
-		// TODO print menu
-		
-		selection = scnr.nextLine();
-		
-		while (invalidSelection(selection)) {
-			System.out.println("\n\nInvalid Selection. Please Try again.\n");
-			selection = scnr.nextLine();
-		}
-		
-		
-		return Integer.parseInt(selection);
-	}
-	
-	public static boolean invalidSelection(String selection) {
-		int selectionInt;
-		
-		try {
-			selectionInt = Integer.parseInt(selection);
-		}
-		catch (NumberFormatException e) {
-			return true;
-		}
-		
-		return (selectionInt < 1 || selectionInt > 7);
-	}
-}
-
-abstract class Person {
-	//TODO
-	protected static final String EMPTY_NAME = "NoName",
-								  EMPTY_ID   = "NoID";
-	
-	private String name;
-	private String id;
-	
-	public static void addToArray(Person[] people, Person personToAdd) {
-		for (int i = 0; i < people.length; i++) {
-			if (people[i] == null) {
-				people[i] = personToAdd;
-				break;
-			}
-		}	
-	}
-
-	public static void printPersonIndex(Person[] personArray, String searchID, String personType) {
-		
-		for (int i = 0; i < personArray.length; i++) {
-			if (personArray[i] != null && personArray[i].getId().equalsIgnoreCase(searchID)) {
-				personArray[i].print();
-				return;
-			}	
-		}
-		
-		printPersonNotFound(personType);
-	}
-	
-	private static void printPersonNotFound(String personType) {
-		System.out.println("\n\n\t" + personType + " not found");
-	}
-	
-	protected String capitalizeFirstLetter(String s) {
-		String retString;
-		retString = s.toLowerCase();
-		retString = retString.substring(0, 1).toUpperCase() + retString.substring(1);
-		
-		return retString;
-	}
-	
+	// Methods to include in Faculty, Staff, and Student classes
 	public abstract void print();
 	public abstract void promptForInfo();
 
 	
 	/**
-	 * @return the name
+	 * Getters and setters
 	 */
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @param name the name to set
-	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	/**
-	 * @return the id
-	 */
 	public String getId() {
 		return id;
 	}
 
-	/**
-	 * @param id the id to set
-	 */
 	public void setId(String id) {
 		this.id = id;
 	}
 
 }
 
+/**
+ * 
+ * Employee abstract class
+ *
+ */
 abstract class Employee extends Person {
-	//TODO
+	// Constants
 	protected static final String DEPT_MATH  = "Mathematics",
 						   		  DEPT_ENGIN = "Engineering",
 						   		  DEPT_SCI   = "Sciences",
 						   		  EMPTY_DEPT = "NoDept";
+	
+	// Fields
 	private String department;
 	
+	/**
+	 * Prompt the user for a department
+	 */
 	public void promptDepartment() {
 		Scanner scnr = new Scanner(System.in);
-		System.out.print("\n\n\tDepartment: ");
+		System.out.print("\n\tDepartment: ");
 		department = scnr.nextLine();
 		
-		while (!isValidDepartment(department)) {
-			System.out.println("\n\t\"" + department + "\" is invalid. Please try again.");
-			System.out.print("\n\n\tDepartment: ");
+		do {
+			System.out.println("\n\t\t\"" + department + "\" is invalid. Please try again.");
+			System.out.print("\n\tDepartment: ");
 			department = scnr.nextLine();
-		}
+		} while (!isValidDepartment(department));
 		
 		// Change to first letter upper case, rest of string lower case
 		department = capitalizeFirstLetter(department);
 		
 	}
 	
-	// Internal method to check validity of department
+	/**
+	 * Check if the user input department is valid
+	 * @param inputDept				User input string department
+	 * @return						true or false
+	 */
 	private boolean isValidDepartment(String inputDept) {
 		return (inputDept.equalsIgnoreCase(DEPT_MATH) || inputDept.equalsIgnoreCase(DEPT_ENGIN) || inputDept.equalsIgnoreCase(DEPT_SCI));
 	}
 	
+
 	/**
-	 * @return the department
+	 * Getters and setters 
 	 */
 	public String getDepartment() {
 		return department;
 	}
 
-	/**
-	 * @param department the department to set
-	 */
 	public void setDepartment(String department) {
 		this.department = department;
 	}
 }
 
+/**
+ * 
+ * Student class
+ *
+ */
 class Student extends Person {
+	// Constants
 	private static final double PRICE_PER_CREDIT_HOUR = 236.45,
 								ADMIN_FEE			  = 52.0,
 								DISCOUNT			  = 0.25,
 								HIGH_GPA			  = 3.85;
+	
+	// Fields
 	private double gpa, tuition, discount;
 	private int creditHours;
 	
@@ -235,72 +322,104 @@ class Student extends Person {
 	 * Default Constructor
 	 */
 	public Student() {
-		gpa = tuition = -1.0;
-		creditHours = -1;
-		this.setName(EMPTY_NAME);
-		this.setId(EMPTY_ID);
+		promptForInfo();
+		calculateNetTuitionAndDiscount();
 	}
 	
 	/**
-	 * Constructor
-	 * @param name
-	 * @param id
-	 * @param gpa
-	 * @param creditHours
+	 * Prompt the user to input the information for a Student
 	 */
-	public Student(String name, String id, double gpa, int creditHours) {
-		this.setName(name);
-		this.setId(id);
-		this.gpa = gpa;
-		this.creditHours = creditHours;
-		tuition = 0;
+	@Override
+	public void promptForInfo() {
+		Scanner scnr = new Scanner(System.in);
+		System.out.println("\nEnter the student info:");
+		
+		System.out.print("\n\tName of Student: ");
+		this.setName(scnr.nextLine());
+		
+		System.out.print("\n\tID: ");
+		this.setId(scnr.nextLine());
+		
+		// If invalid format input to gpa or credit hours, set to 0
+		System.out.print("\n\tGpa: ");
+		String gpaString = scnr.nextLine();
+		try {
+			gpa = Double.parseDouble(gpaString);
+		}
+		catch (NumberFormatException e) {
+			gpa = 0.0;
+		}
+		
+		System.out.print("\n\tCredit Hours: ");
+		String creditHourString = scnr.nextLine();
+		try {
+			creditHours = Integer.parseInt(creditHourString);
+		}
+		catch (NumberFormatException e) {
+			creditHours = 0;
+		}
+		
+		System.out.println("\nStudent Added!");
 	}
 	
+	/**
+	 * Calculate the tuition and discount
+	 */
 	public void calculateNetTuitionAndDiscount() {
 		double grossTuition = calculateGrossTuition();
 		this.discount = calculateDiscount(grossTuition);
 		this.tuition = grossTuition - this.discount;		
 	}
 	
+	/**
+	 * Calculate the gross tuition
+	 * @return					double gross tuition
+	 */
 	private double calculateGrossTuition() {
 		return ADMIN_FEE + (creditHours * PRICE_PER_CREDIT_HOUR);
 	}
 	
+	/**
+	 * Calculate the discount
+	 * @param grossTuition		double gross tuition
+	 * @return					double discount
+	 */
 	private double calculateDiscount(double grossTuition) {
 		return (gpa > HIGH_GPA) ? (grossTuition * DISCOUNT) : 0.0;
 	}
 	
+	/**
+	 * Print a Student's info
+	 */
 	@Override
 	public void print() {
 		// TODO Auto-generated method stub
 		System.out.println(this.toString());
 	}
-	//TODO
+	
+	@Override		//FIXME
+	public String toString() {
+		return "Student [gpa=" + gpa + ", tuition=" + tuition + ", discount=" + discount + ", creditHours="
+				+ creditHours + "]";
+	}
 
 	/**
-	 * @return the gpa
+	 * Getters and setters
 	 */
 	public double getGpa() {
 		return gpa;
 	}
 
-	/**
-	 * @param gpa the gpa to set
-	 */
+
 	public void setGpa(double gpa) {
 		this.gpa = gpa;
 	}
 
-	/**
-	 * @return the creditHours
-	 */
+
 	public int getCreditHours() {
 		return creditHours;
 	}
 
-	/**
-	 * @param creditHours the creditHours to set
-	 */
 	public void setCreditHours(int creditHours) {
 		this.creditHours = creditHours;
 	}
@@ -312,40 +431,31 @@ class Student extends Person {
 	public double getTuition() {
 		return tuition;
 	}
-
-	@Override		//FIXME
-	public String toString() {
-		return "Student [gpa=" + gpa + ", tuition=" + tuition + ", discount=" + discount + ", creditHours="
-				+ creditHours + "]";
-	}
-
-	@Override
-	public void promptForInfo() {
-		// TODO Auto-generated method stub
-		
-	}
 }
 
+/**
+ * 
+ * Faculty Class
+ *
+ */
 class Faculty extends Employee {
+	// Constants
 	private static final String RANK_PROF =  "Professor",
-								RANK_ADJ  =  "Adjunct",
-								EMPTY_RANK = "NoRank";
+								RANK_ADJ  =  "Adjunct";
+	
+	// Fields
 	private String rank;
 	
-	public Faculty() {
-		this.setName(EMPTY_NAME);
-		this.setId(EMPTY_ID);
-		this.setDepartment(EMPTY_DEPT);
-		rank = EMPTY_RANK;
+	/**
+	 * Default Constructor
+	 */
+	public Faculty() {		
+		promptForInfo();
 	}
 	
-	public Faculty(String name, String id, String dept, String rank) {
-		this.setName(name);
-		this.setId(id);
-		this.setDepartment(dept);
-		this.rank = rank;
-	}
-	
+	/**
+	 * Prompt the user for a Faculty's information
+	 */
 	@Override
 	public void promptForInfo() {
 		Scanner scnr = new Scanner(System.in);
@@ -354,46 +464,40 @@ class Faculty extends Employee {
 		System.out.print("\n\tName of Faculty: ");
 		this.setName(scnr.nextLine());
 		
-		System.out.print("\n\n\tID: ");
+		System.out.print("\n\tID: ");
 		this.setId(scnr.nextLine());
 		
-		// make sure rank valid
-		while (!this.hasValidRank()) {
-			System.out.print("\n\n\tRank: ");
+		// Check if rank valid
+		do {
+			System.out.print("\n\tRank: ");
 			this.setRank(scnr.nextLine());
 			if (!this.hasValidRank())
-				System.out.println("\n\n\t\t\"" + this.getRank() + "\" is invalid\n");
-		}
+				System.out.println("\n\t\t\"" + this.getRank() + "\" is invalid");
+		} while (!this.hasValidRank());
 		
 		rank = capitalizeFirstLetter(rank);
 		
 		this.promptDepartment();
 		
+		System.out.println("\n\nFaculty Added!");
+		
 	}
 		
+	/**
+	 * Check if rank is valid
+	 * @return				true or false
+	 */
 	private boolean hasValidRank() {
 		return (rank.equalsIgnoreCase(RANK_PROF) || rank.equalsIgnoreCase(RANK_ADJ));
 	}
 	
+	/**
+	 * Print a Faculty's info
+	 */
 	@Override
 	public void print() {
 		// TODO Auto-generated method stub
 		System.out.println(this);
-	}
-	//TODO
-
-	/**
-	 * @return the rank
-	 */
-	public String getRank() {
-		return rank;
-	}
-
-	/**
-	 * @param rank the rank to set
-	 */
-	public void setRank(String rank) {
-		this.rank = rank;
 	}
 
 	@Override		//FIXME
@@ -401,66 +505,89 @@ class Faculty extends Employee {
 		return "Faculty [rank=" + rank + ", getDepartment()=" + getDepartment() + ", getName()=" + getName()
 				+ ", getId()=" + getId() + "]";
 	}
+	
+	/**
+	 * Getters and Setters
+	 */
+	public String getRank() {
+		return rank;
+	}
 
+
+	public void setRank(String rank) {
+		this.rank = rank;
+	}
 }
 
+/**
+ * 
+ * Staff class
+ *
+ */
 class Staff extends Employee {
-	private static final String EMPTY_STATUS = "NoStatus";
+	// Constants
+	private static final String PART_TIME = "P",
+							    FULL_TIME = "F";
+	
+	// Fields
 	private String status;
 	
+	/**
+	 * Default Constructor
+	 */
 	public Staff() {
-		this.setName(EMPTY_NAME);
-		this.setId(EMPTY_ID);
-		this.setDepartment(EMPTY_DEPT);
-		status = EMPTY_STATUS;
+		promptForInfo();
 	}
 	
-	public Staff(String name, String id, String dept, String status) {
-		this.setName(name);
-		this.setId(id);
-		this.setDepartment(dept);
-		this.status = status;
+	/**
+	 * Prompt user for a Staff's information
+	 */
+	@Override
+	public void promptForInfo() {
+		// TODO Auto-generated method stub
+		
 	}
 	
-	protected boolean isValidStatus(String currStatus) {
+	/**
+	 * Check if user input status is valid
+	 * @param currStatus			String of status
+	 * @return						true or false
+	 */
+	private boolean isValidStatus(String currStatus) {
 		return (currStatus.equalsIgnoreCase("p") || currStatus.equalsIgnoreCase("f"));
 	}
 	
+	/**
+	 * Check if user input status is valid
+	 * @return						true or false
+	 */
 	private boolean hasValidStatus() {
 		return (status.equalsIgnoreCase("p") || status.equalsIgnoreCase("f"));
 	}
 	
+	/**
+	 * Print a Staff's information
+	 */
 	@Override
 	public void print() {
 		// TODO Auto-generated method stub
 		System.out.println(this.toString());
 	}
-	//TODO
-
-	/**
-	 * @return the status
-	 */
-	public String getStatus() {
-		return status;
-	}
-
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
+	
 	@Override		//FIXME
 	public String toString() {
 		return "Staff [status=" + status + ", getDepartment()=" + getDepartment() + ", getName()=" + getName()
 				+ ", getId()=" + getId() + "]";
 	}
 
-	@Override
-	public void promptForInfo() {
-		// TODO Auto-generated method stub
-		
-	} 
+	/**
+	 * Getters and setters
+	 */
+	public String getStatus() {
+		return status;
+	}
 
+	public void setStatus(String status) {
+		this.status = status;
+	}
 }
