@@ -1,3 +1,4 @@
+
 import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.util.Scanner;
@@ -10,7 +11,8 @@ public class Project2 {
 		int choice = 0;
 		Person[] people = new Person[MAX_PEOPLE];
 
-		// Welcome Message
+		// Welcome Message	
+		System.out.println("\t\t\tWelcome to my Personal Management Program\n\n");
 
 		while (choice != 7) {
 			// Get option
@@ -27,6 +29,7 @@ public class Project2 {
 	 * @param people				Array of Person
 	 */
 	public static void runOptionSwitch(int choice, Person[] people) {
+		
 		switch(choice) {
 			case 1: // Enter Faculty info
 				Faculty tempFaculty = new Faculty();
@@ -46,7 +49,7 @@ public class Project2 {
 				Person.findAndPrintPerson(people, choice, Person.casePersonType(choice));
 				break;
 			case 7:
-				System.out.println("\n\n\nThank you, goodbye.\n");
+				System.out.println("\n\n\nGoodbye!\n");
 				break;
 			default: // Invalid selection already handled in getOptionSelected
 				break;
@@ -64,7 +67,7 @@ public class Project2 {
 		selection = scnr.nextLine();
 
 		while (invalidSelection(selection)) {
-			System.out.println("\n\tInvalid Selection. Please Try again.\n");
+			System.out.println("\n\tInvalid entry- please try again.\n");
 			System.out.print("\n   Enter your Selection: ");
 			selection = scnr.nextLine();
 		}
@@ -97,13 +100,14 @@ public class Project2 {
 	 */
 	public static int printOptionMenu() {
 		PrintStream out = new PrintStream(System.out);
-
+			
+		
 		out.println("1. Enter the information of a faculty");
 		out.println("2. Enter the information of a student");
 		out.println("3. Print tuition invoice");
 		out.println("4. Print faculty information");
 		out.println("5. Enter the information of a staff member");
-		out.println("6. Print staff member information");
+		out.println("6. Print the information of a staff member");
 		out.println("7. Exit Program");
 		out.print("\n   Enter your Selection: ");
 
@@ -119,7 +123,7 @@ public class Project2 {
 abstract class Person {
 	// Constants
 	protected static final String FACULTY = "Faculty",
-			   					  STAFF   = "Staff",
+			   					  STAFF   = "Staff member",
 			                      STUDENT = "Student";
 	
 	// Fields
@@ -174,7 +178,7 @@ abstract class Person {
 			}
 		}
 
-		System.out.println("\n\n" + personType + " not found\n\n");
+		System.out.println("\n\n No " + personType + " matched!\n\n");
 	}
 
 	/**
@@ -563,12 +567,11 @@ class Staff extends Employee {
 	@Override
 	public void promptForInfo() {
 		Scanner scnr = new Scanner(System.in);
-		System.out.println("\nEnter the staff info:");
 
-		System.out.print("\n\tName of Staff: ");
+		System.out.print("\n\tName of Staff Member: ");
 		this.setName(scnr.nextLine());
 
-		System.out.print("\n\tID: ");
+		System.out.print("\n\tEnter the ID: ");
 		this.setId(scnr.nextLine());
 
 		this.promptDepartment();
@@ -582,7 +585,7 @@ class Staff extends Employee {
 		
 		this.status = this.status.toUpperCase();
 
-		System.out.println("\n\nStaff Added!\n\n");
+		System.out.println("\n\nStaff member Added!\n\n");
 	}
 	
 	/**
