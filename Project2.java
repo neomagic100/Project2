@@ -1,3 +1,7 @@
+/*
+ - Project 2
+ - Michael Bernhardt and Cole Cooper
+*/
 
 import java.io.PrintStream;
 import java.text.NumberFormat;
@@ -11,7 +15,6 @@ public class Project2 {
 		int choice = 0;
 		Person[] people = new Person[MAX_PEOPLE];
 
-		// Welcome Message	
 		System.out.println("\t\t\tWelcome to my Personal Management Program\n\n");
 
 		while (choice != 7) {
@@ -29,7 +32,7 @@ public class Project2 {
 	 * @param people				Array of Person
 	 */
 	public static void runOptionSwitch(int choice, Person[] people) {
-		
+
 		switch(choice) {
 			case 1: // Enter Faculty info
 				Faculty tempFaculty = new Faculty();
@@ -100,8 +103,7 @@ public class Project2 {
 	 */
 	public static int printOptionMenu() {
 		PrintStream out = new PrintStream(System.out);
-			
-		
+
 		out.println("1. Enter the information of a faculty");
 		out.println("2. Enter the information of a student");
 		out.println("3. Print tuition invoice");
@@ -125,7 +127,7 @@ abstract class Person {
 	protected static final String FACULTY = "Faculty",
 			   					  STAFF   = "Staff member",
 			                      STUDENT = "Student";
-	
+
 	// Fields
 	private String name;
 	private String id;
@@ -218,7 +220,10 @@ abstract class Person {
 
 		return personType;
 	}
-	
+
+	/**
+	 * Print a line of dashes to console
+	 */
 	protected void printDashesLine() {
 		System.out.println("\n---------------------------------------------------------------------------\n");
 	}
@@ -269,7 +274,7 @@ abstract class Employee extends Person {
 	 */
 	public void promptDepartment() {
 		Scanner scnr = new Scanner(System.in);
-		
+
 		do {
 			System.out.print("\n\tDepartment: ");
 			this.department = scnr.nextLine();
@@ -400,17 +405,17 @@ class Student extends Person {
 	@Override
 	public void print() {
 		NumberFormat n = NumberFormat.getCurrencyInstance();
-		
+
 		System.out.println();
 		System.out.println("\nTuition Invoice for " + this.getName() + ":");
-		
+
 		this.printDashesLine();
 		System.out.println(this);
-	
+
 		System.out.printf("%nFees: $%.0f", ADMIN_FEE);
 		System.out.printf("%n%n%nTotal payment (after discount): %s", n.format(this.tuition));
 		System.out.printf("\t\t(%s discount applied)%n", n.format(this.discount));
-		
+
 		this.printDashesLine();
 		System.out.println();
 	}
@@ -419,7 +424,7 @@ class Student extends Person {
 	public String toString() {
 		String retString = this.getName() + "\t\t" + this.getId() + "\n\n";
 		retString += "Credit Hours: " + this.creditHours + " ($" + PRICE_PER_CREDIT_HOUR + "/ credit hour)";
-		
+
 		return retString;
 	}
 
@@ -575,19 +580,19 @@ class Staff extends Employee {
 		this.setId(scnr.nextLine());
 
 		this.promptDepartment();
-		
+
 		do {
 			System.out.print("\n\tStaus, Enter P for Part Time, or Enter F for Full Time: ");
 			this.status = scnr.nextLine();
 			if (!this.hasValidStatus())
 				System.out.println("\n\t\t\"" + this.status + "\" is invalid");
 		} while (!this.hasValidStatus());
-		
+
 		this.status = this.status.toUpperCase();
 
 		System.out.println("\n\nStaff member Added!\n\n");
 	}
-	
+
 	/**
 	 * Check if user input status is valid
 	 * @return						true or false
@@ -611,12 +616,12 @@ class Staff extends Employee {
 	@Override
 	public String toString() {
 		String retString = this.getName() + "\t\t" + this.getId() + "\n\n" + this.getDepartment() + " Department, ";
-		
+
 		if (this.getStatus().equalsIgnoreCase(PART_TIME))
 			retString += "Part Time";
 		else
 			retString += "Full Time";
-		
+
 		return retString;
 	}
 
