@@ -347,7 +347,19 @@ class Student extends Person {
 		System.out.print("\n\tID: ");
 		this.setId(scnr.nextLine());
 
-		// If invalid format input to gpa or credit hours, set to 0
+		promptForGpa();
+		
+		promptForCreditHours();
+
+		System.out.println("\nStudent Added!\n\n");
+	}
+	
+	/**
+	 * Prompt for GPA and check if it is numerical and is between 0 and 4.0 exclusive
+	 */
+	private void promptForGpa() {
+		Scanner scnr = new Scanner(System.in);
+				
 		System.out.print("\n\tGpa: ");
 		String gpaString = scnr.nextLine();
 		try {
@@ -356,9 +368,17 @@ class Student extends Person {
 				throw new NumberFormatException();
 		}
 		catch (NumberFormatException e) {
-			this.gpa = 0.0;
+			System.out.println("\n\t\t\"" + gpaString + "\" is invalid. Please try again.");
+			promptForGpa();
 		}
-
+	}
+	
+	/**
+	 * Prompt for credit hours and check if it is numerical and is at least 0
+	 */
+	private void promptForCreditHours() {
+		Scanner scnr = new Scanner(System.in);
+		
 		System.out.print("\n\tCredit Hours: ");
 		String creditHourString = scnr.nextLine();
 		try {
@@ -367,10 +387,9 @@ class Student extends Person {
 				throw new NumberFormatException();
 		}
 		catch (NumberFormatException e) {
-			this.creditHours = 0;
+			System.out.println("\n\t\t\"" + creditHourString + "\" is invalid. Please try again.");
+			promptForCreditHours();
 		}
-
-		System.out.println("\nStudent Added!\n\n");
 	}
 
 	/**
